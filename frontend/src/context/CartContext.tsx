@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useReducer, useEffect, useCallback, useRef, ReactNode } from "react";
+import React, { createContext, useReducer, useEffect, useCallback, useRef, ReactNode } from "react";
 import { Event, CartItem } from "@/types";
 
 interface CartState {
