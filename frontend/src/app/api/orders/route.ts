@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ message: "Dados incompletos" }, { status: 400 });
     }
 
-    // Validate all items
+
     const orderItems = [];
     let totalPrice = 0;
 

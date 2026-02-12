@@ -9,7 +9,7 @@ interface BaseButtonProps extends MuiButtonProps {
 const StyledButton = styled(MuiButton, {
     shouldForwardProp: (prop) => prop !== "premium",
 })<BaseButtonProps>(({ theme, premium }) => ({
-    borderRadius: "1px", // Sharp Ticket Geometry
+    borderRadius: "1px",
     textTransform: "uppercase",
     fontWeight: 800,
     letterSpacing: "0.05em",
@@ -30,14 +30,10 @@ const StyledButton = styled(MuiButton, {
         }
     }),
 
-    // Ticket notch effect simulation using clip-path (subtle)
-    // clipPath: "polygon(0% 10%, 5% 0%, 95% 0%, 100% 10%, 100% 90%, 95% 100%, 5% 100%, 0% 90%)",
+
 }));
 
-/**
- * Premium Button component following the 2025 "Sharp Ticket" aesthetic.
- * Extends MUI Button with custom spring animations and geometry.
- */
+
 export default function Button({ children, ...props }: BaseButtonProps) {
     return (
         <StyledButton {...props}>

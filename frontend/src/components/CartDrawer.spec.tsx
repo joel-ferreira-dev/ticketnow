@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import CartDrawer from "./CartDrawer";
 import { CartProvider } from "@/context/CartContext";
 
-// Mock next/navigation
+
 jest.mock("next/navigation", () => ({
     useRouter: () => ({
         push: jest.fn(),
@@ -48,7 +48,7 @@ describe("CartDrawer", () => {
             { wrapper },
         );
 
-        // With empty cart, there should be a "Ver Eventos" or similar button
+
         const buttons = screen.getAllByRole("button");
         expect(buttons.length).toBeGreaterThan(0);
     });

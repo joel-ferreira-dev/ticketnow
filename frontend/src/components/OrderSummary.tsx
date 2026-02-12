@@ -20,10 +20,7 @@ interface OrderSummaryProps {
     onSubmit: () => void;
 }
 
-/**
- * Order summary sidebar organism.
- * Centralizes total calculation and the final "Call to Action" for payment.
- */
+
 export default function OrderSummary({
     items,
     totalItems,

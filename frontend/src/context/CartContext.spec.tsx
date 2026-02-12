@@ -33,7 +33,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
     <CartProvider>{children}</CartProvider>
 );
 
-// Mock localStorage
+
 const localStorageMock = (() => {
     let store: Record<string, string> = {};
     return {

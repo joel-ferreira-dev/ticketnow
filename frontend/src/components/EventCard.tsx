@@ -61,7 +61,7 @@ export default function EventCard({ event }: EventCardProps) {
                     display: "flex",
                     flexDirection: "column",
                     height: "100%",
-                    borderRadius: "1px", // Sharp Ticket Geometry
+                    borderRadius: "1px",
                     opacity: isSoldOut ? 0.6 : 1,
                     position: "relative",
                     overflow: "hidden",
@@ -157,7 +157,6 @@ export default function EventCard({ event }: EventCardProps) {
                     </Stack>
                 </CardContent>
                 <Box sx={{ p: 3, pt: 1, display: "flex", flexDirection: "column", gap: 2 }}>
-                    {/* Linha Superior: Preço e Quantidade */}
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <Box>
                             <Typography variant="caption" sx={{ color: "text.secondary", textTransform: "uppercase", fontWeight: 700, fontSize: "0.65rem", display: "block", mb: -0.5 }}>
@@ -193,7 +192,6 @@ export default function EventCard({ event }: EventCardProps) {
                         )}
                     </Box>
 
-                    {/* Linha Inferior: Botão Centralizado */}
                     <Box sx={{ display: "flex", justifyContent: "center" }}>
                         {!isSoldOut ? (
                             <Button

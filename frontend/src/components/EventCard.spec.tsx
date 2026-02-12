@@ -4,7 +4,7 @@ import EventCard from "./EventCard";
 import { CartProvider } from "@/context/CartContext";
 import { Event } from "@/types";
 
-// Mock next/navigation
+
 jest.mock("next/navigation", () => ({
     useRouter: () => ({
         push: jest.fn(),
@@ -56,9 +56,9 @@ describe("EventCard", () => {
         expect(screen.getByText("Festival")).toBeInTheDocument();
     });
 
-    it("should show Adicionar button for available events", () => {
+    it("should show Adicionar ao Carrinho button for available events", () => {
         render(<EventCard event={mockEvent} />, { wrapper });
-        expect(screen.getByText("Adicionar")).toBeInTheDocument();
+        expect(screen.getByText("Adicionar ao Carrinho")).toBeInTheDocument();
     });
 
     it("should show Esgotado for sold out events", () => {
@@ -66,8 +66,8 @@ describe("EventCard", () => {
         expect(screen.getAllByText("Esgotado").length).toBeGreaterThan(0);
     });
 
-    it("should not show Adicionar button for sold out events", () => {
+    it("should not show Adicionar ao Carrinho button for sold out events", () => {
         render(<EventCard event={soldOutEvent} />, { wrapper });
-        expect(screen.queryByText("Adicionar")).not.toBeInTheDocument();
+        expect(screen.queryByText("Adicionar ao Carrinho")).not.toBeInTheDocument();
     });
 });

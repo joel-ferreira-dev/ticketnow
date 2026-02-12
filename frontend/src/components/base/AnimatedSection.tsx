@@ -14,24 +14,21 @@ const fadeInUp = keyframes`
 `;
 
 const SectionWrapper = styled(Box)<{ delay?: number }>(({ delay = 0 }) => ({
-    opacity: 0,
-    animation: `${fadeInUp} 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards`,
-    animationDelay: `${delay}ms`,
+  opacity: 0,
+  animation: `${fadeInUp} 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards`,
+  animationDelay: `${delay}ms`,
 }));
 
 interface AnimatedSectionProps extends BoxProps {
-    children: ReactNode;
-    delay?: number;
+  children: ReactNode;
+  delay?: number;
 }
 
-/**
- * A layout component that applies a staggered reveal animation to its content.
- * Essential for the "Wow" factor and premium feel.
- */
+
 export default function AnimatedSection({ children, delay, ...props }: AnimatedSectionProps) {
-    return (
-        <SectionWrapper delay={delay} {...props}>
-            {children}
-        </SectionWrapper>
-    );
+  return (
+    <SectionWrapper delay={delay} {...props}>
+      {children}
+    </SectionWrapper>
+  );
 }

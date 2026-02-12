@@ -19,10 +19,7 @@ interface HeroProps {
     categories: string[];
 }
 
-/**
- * Hero organism for the events landing page.
- * Implements massive typography and a disruptive staggered layout.
- */
+
 export default function Hero({
     search,
     onSearchChange,

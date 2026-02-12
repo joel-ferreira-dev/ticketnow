@@ -22,10 +22,7 @@ interface OrderSuccessProps {
     onBackToHome: () => void;
 }
 
-/**
- * Success view organism for the checkout process.
- * Features a high-contrast validation check and clean detail summary.
- */
+
 export default function OrderSuccess({
     orderId,
     customerName,
