@@ -24,7 +24,6 @@ interface AnimatedSectionProps extends BoxProps {
   delay?: number;
 }
 
-
 export default function AnimatedSection({ children, delay, ...props }: AnimatedSectionProps) {
   return (
     <SectionWrapper delay={delay} {...props}>

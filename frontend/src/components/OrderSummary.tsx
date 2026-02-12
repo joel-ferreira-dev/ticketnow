@@ -20,7 +20,6 @@ interface OrderSummaryProps {
     onSubmit: () => void;
 }
 
-
 export default function OrderSummary({
     items,
     totalItems,

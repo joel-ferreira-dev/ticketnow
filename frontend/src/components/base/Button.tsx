@@ -30,9 +30,7 @@ const StyledButton = styled(MuiButton, {
         }
     }),
 
-
 }));
-
 
 export default function Button({ children, ...props }: BaseButtonProps) {
     return (

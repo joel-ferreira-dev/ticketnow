@@ -158,7 +158,6 @@ describe("OrdersService", () => {
         it("should throw when second item has insufficient tickets in DB", async () => {
             mockEventsService.findByIds.mockResolvedValueOnce([mockEvent1, mockEvent2]);
 
-            // First item succeeds, second item fails in DB update (race condition)
             mockQueryRunner.manager.createQueryBuilder()
                 .execute
                 .mockResolvedValueOnce({ affected: 1 })

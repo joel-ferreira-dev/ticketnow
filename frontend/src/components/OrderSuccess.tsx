@@ -22,7 +22,6 @@ interface OrderSuccessProps {
     onBackToHome: () => void;
 }
 
-
 export default function OrderSuccess({
     orderId,
     customerName,

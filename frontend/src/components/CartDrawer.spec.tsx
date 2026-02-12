@@ -3,7 +3,6 @@ import { render, screen } from "@testing-library/react";
 import CartDrawer from "./CartDrawer";
 import { CartProvider } from "@/context/CartContext";
 
-
 jest.mock("next/navigation", () => ({
     useRouter: () => ({
         push: jest.fn(),
@@ -47,7 +46,6 @@ describe("CartDrawer", () => {
             <CartDrawer open={true} onClose={jest.fn()} />,
             { wrapper },
         );
-
 
         const buttons = screen.getAllByRole("button");
         expect(buttons.length).toBeGreaterThan(0);

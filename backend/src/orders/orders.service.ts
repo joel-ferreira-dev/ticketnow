@@ -28,7 +28,7 @@ export class OrdersService {
         await queryRunner.startTransaction();
 
         try {
-            // 1. Batch load and validate events
+
             const eventIds = dto.items.map(i => i.eventId);
             const events = await this.eventsService.findByIds(eventIds);
 
@@ -56,8 +56,6 @@ export class OrdersService {
 
                 totalPrice += orderItem.unitPrice * item.quantity;
 
-                // 2. Decrease tickets using atomic update within transaction
-                // Note: Even with the check above, the DB update has another check for safety
                 const updateResult = await queryRunner.manager
                     .createQueryBuilder()
                     .update(Event)
@@ -73,7 +71,6 @@ export class OrdersService {
                 }
             }
 
-            // 3. Create and save order
             const order = queryRunner.manager.create(Order, {
                 customerName: dto.customerName,
                 customerEmail: dto.customerEmail,
@@ -86,7 +83,6 @@ export class OrdersService {
             const savedOrder = await queryRunner.manager.save(order);
             await queryRunner.commitTransaction();
 
-            // Return with relations (we can load them manually or use the saved object if possible)
             return this.findOne(savedOrder.id);
         } catch (err) {
             await queryRunner.rollbackTransaction();

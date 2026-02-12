@@ -4,7 +4,6 @@ import EventCard from "./EventCard";
 import { CartProvider } from "@/context/CartContext";
 import { Event } from "@/types";
 
-
 jest.mock("next/navigation", () => ({
     useRouter: () => ({
         push: jest.fn(),

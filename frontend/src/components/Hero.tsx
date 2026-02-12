@@ -19,7 +19,6 @@ interface HeroProps {
     categories: string[];
 }
 
-
 export default function Hero({
     search,
     onSearchChange,
