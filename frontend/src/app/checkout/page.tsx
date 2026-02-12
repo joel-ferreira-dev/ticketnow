@@ -24,6 +24,8 @@ import CartItemComponent from "@/components/CartItem";
 import PaymentForm from "@/components/PaymentForm";
 import { PaymentMethod, CardData } from "@/types";
 import api from "@/lib/api";
+import OrderSuccess from "@/components/OrderSuccess";
+import OrderSummary from "@/components/OrderSummary";
 
 export default function CheckoutPage() {
     const router = useRouter();
@@ -93,86 +95,14 @@ export default function CheckoutPage() {
 
     if (orderConfirmed) {
         return (
-            <Box sx={{ minHeight: "80vh", display: "flex", alignItems: "center" }}>
-                <Container maxWidth="sm">
-                    <Paper
-                        elevation={0}
-                        sx={{
-                            p: 5,
-                            textAlign: "center",
-                            border: "1px solid",
-                            borderColor: "divider",
-                            borderRadius: 3,
-                        }}
-                    >
-                        <Box
-                            sx={{
-                                width: 80,
-                                height: 80,
-                                borderRadius: "50%",
-                                bgcolor: "rgba(34, 197, 94, 0.1)",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                mx: "auto",
-                                mb: 3,
-                            }}
-                        >
-                            <CheckCircleIcon sx={{ fontSize: 48, color: "#22c55e" }} />
-                        </Box>
-                        <Typography variant="h4" fontWeight={800} sx={{ mb: 1 }}>
-                            Pedido Confirmado!
-                        </Typography>
-                        <Typography color="text.secondary" sx={{ mb: 3 }}>
-                            Seus ingressos foram reservados com sucesso.
-                        </Typography>
-                        <Chip
-                            label={`Pedido #${orderId}`}
-                            sx={{
-                                fontWeight: 700,
-                                fontSize: "1rem",
-                                py: 2,
-                                px: 1,
-                                bgcolor: "rgba(245,158,11,0.1)",
-                                color: "primary.main",
-                                mb: 3,
-                            }}
-                        />
-                        <Divider sx={{ my: 3 }} />
-                        <Stack spacing={1} sx={{ textAlign: "left", mb: 3 }}>
-                            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                                <Typography variant="body2" color="text.secondary">Comprador</Typography>
-                                <Typography variant="body2" fontWeight={600}>{customerName}</Typography>
-                            </Box>
-                            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                                <Typography variant="body2" color="text.secondary">E-mail</Typography>
-                                <Typography variant="body2" fontWeight={600}>{customerEmail}</Typography>
-                            </Box>
-                            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                                <Typography variant="body2" color="text.secondary">Pagamento</Typography>
-                                <Typography variant="body2" fontWeight={600}>
-                                    {paymentMethod === "pix" ? "Pix" : "Cartão de Crédito"}
-                                </Typography>
-                            </Box>
-                            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                                <Typography variant="body2" color="text.secondary">Total</Typography>
-                                <Typography variant="body2" fontWeight={800} color="primary.main">
-                                    {formattedTotal}
-                                </Typography>
-                            </Box>
-                        </Stack>
-                        <Button
-                            variant="contained"
-                            fullWidth
-                            size="large"
-                            onClick={() => router.push("/")}
-                            sx={{ py: 1.5, fontWeight: 700 }}
-                        >
-                            Voltar para Eventos
-                        </Button>
-                    </Paper>
-                </Container>
-            </Box>
+            <OrderSuccess
+                orderId={orderId}
+                customerName={customerName}
+                customerEmail={customerEmail}
+                paymentMethod={paymentMethod}
+                totalAmount={formattedTotal}
+                onBackToHome={() => router.push("/")}
+            />
         );
     }
 
@@ -265,77 +195,14 @@ export default function CheckoutPage() {
                     </Grid>
 
                     <Grid size={{ xs: 12, md: 5 }}>
-                        <Paper
-                            elevation={0}
-                            sx={{
-                                p: 3,
-                                border: "1px solid",
-                                borderColor: "divider",
-                                borderRadius: 3,
-                                position: "sticky",
-                                top: 80,
-                            }}
-                        >
-                            <Typography variant="h5" fontWeight={800} sx={{ mb: 2 }}>
-                                Resumo do Pedido
-                            </Typography>
-                            <Stack spacing={1.5} divider={<Divider />}>
-                                {items.map((item) => (
-                                    <Box key={item.event.id} sx={{ display: "flex", justifyContent: "space-between" }}>
-                                        <Box>
-                                            <Typography variant="body2" fontWeight={600}>
-                                                {item.event.title}
-                                            </Typography>
-                                            <Typography variant="caption" color="text.secondary">
-                                                {item.quantity}x{" "}
-                                                {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(item.event.price)}
-                                            </Typography>
-                                        </Box>
-                                        <Typography variant="body2" fontWeight={700}>
-                                            {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
-                                                item.event.price * item.quantity
-                                            )}
-                                        </Typography>
-                                    </Box>
-                                ))}
-                            </Stack>
-                            <Divider sx={{ my: 2 }} />
-                            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
-                                <Typography variant="body1" fontWeight={700}>
-                                    Total ({totalItems} {totalItems === 1 ? "ingresso" : "ingressos"})
-                                </Typography>
-                                <Typography variant="h4" fontWeight={800} color="primary.main">
-                                    {formattedTotal}
-                                </Typography>
-                            </Box>
-
-                            {submitError && (
-                                <Alert severity="error" sx={{ mb: 2 }}>
-                                    {submitError}
-                                </Alert>
-                            )}
-
-                            <Button
-                                variant="contained"
-                                fullWidth
-                                size="large"
-                                onClick={handleSubmit}
-                                disabled={loading}
-                                sx={{
-                                    py: 2,
-                                    fontWeight: 800,
-                                    fontSize: "1.1rem",
-                                    borderRadius: 2,
-                                    background: "linear-gradient(135deg, #f59e0b, #f97316)",
-                                    "&:hover": { background: "linear-gradient(135deg, #d97706, #ea580c)" },
-                                }}
-                            >
-                                {loading ? <CircularProgress size={24} color="inherit" /> : "Finalizar Pagamento"}
-                            </Button>
-                            <Typography variant="caption" color="text.secondary" sx={{ display: "block", textAlign: "center", mt: 1.5 }}>
-                                🔒 Pagamento 100% seguro
-                            </Typography>
-                        </Paper>
+                        <OrderSummary
+                            items={items}
+                            totalItems={totalItems}
+                            formattedTotal={formattedTotal}
+                            loading={loading}
+                            submitError={submitError}
+                            onSubmit={handleSubmit}
+                        />
                     </Grid>
                 </Grid>
             </Container>

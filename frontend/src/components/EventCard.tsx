@@ -6,7 +6,6 @@ import {
     CardContent,
     CardActions,
     Typography,
-    Button,
     Chip,
     Box,
     Stack,
@@ -19,6 +18,7 @@ import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
 import IconButton from "@mui/material/IconButton";
+import Button from "./base/Button";
 import { Event } from "@/types";
 import { useCart } from "@/hooks/useCart";
 
@@ -61,15 +61,18 @@ export default function EventCard({ event }: EventCardProps) {
                     display: "flex",
                     flexDirection: "column",
                     height: "100%",
+                    borderRadius: "1px", // Sharp Ticket Geometry
                     opacity: isSoldOut ? 0.6 : 1,
                     position: "relative",
                     overflow: "hidden",
-                    transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                    border: "1px solid",
+                    borderColor: "rgba(255,255,255,0.05)",
+                    transition: "transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease",
                     "&:hover": isSoldOut
                         ? {}
                         : {
-                            transform: "translateY(-4px)",
-                            boxShadow: "0 12px 40px rgba(245,158,11,0.15)",
+                            transform: "translateY(-8px)",
+                            boxShadow: "0 24px 50px rgba(0,0,0,0.4), 0 0 20px rgba(245,158,11,0.1)",
                         },
                 }}
             >

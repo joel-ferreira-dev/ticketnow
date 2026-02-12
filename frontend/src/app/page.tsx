@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import SearchIcon from "@mui/icons-material/Search";
+import Hero from "@/components/Hero";
 import EventCard from "@/components/EventCard";
 import EventCardSkeleton from "@/components/EventCardSkeleton";
 import { Event } from "@/types";
@@ -56,45 +57,13 @@ export default function EventsPage() {
     return (
         <Box sx={{ minHeight: "100vh", py: 4 }}>
             <Container maxWidth="lg">
-                <Box sx={{ mb: 5 }}>
-                    <Typography variant="h1" sx={{ mb: 1 }}>
-                        Eventos em destaque
-                    </Typography>
-                    <Typography variant="body1" color="text.secondary" sx={{ mb: 3, maxWidth: 500 }}>
-                        Descubra shows, festivais e experiências únicas perto de você.
-                    </Typography>
-                    <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems={{ sm: "center" }}>
-                        <TextField
-                            placeholder="Buscar eventos ou locais..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            size="small"
-                            sx={{ minWidth: 300 }}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <SearchIcon sx={{ color: "text.secondary" }} />
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-                        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                            {CATEGORIES.map((cat) => (
-                                <Chip
-                                    key={cat}
-                                    label={cat}
-                                    clickable
-                                    onClick={() => setSelectedCategory(cat)}
-                                    variant={selectedCategory === cat ? "filled" : "outlined"}
-                                    color={selectedCategory === cat ? "primary" : "default"}
-                                    sx={{
-                                        transition: "all 0.15s ease",
-                                    }}
-                                />
-                            ))}
-                        </Stack>
-                    </Stack>
-                </Box>
+                <Hero
+                    search={search}
+                    onSearchChange={setSearch}
+                    selectedCategory={selectedCategory}
+                    onCategoryChange={setSelectedCategory}
+                    categories={CATEGORIES}
+                />
 
                 {error && (
                     <Alert severity="error" sx={{ mb: 3 }}>
