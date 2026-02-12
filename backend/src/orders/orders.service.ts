@@ -1,11 +1,10 @@
-import { Injectable, BadRequestException, NotFoundException } from "@nestjs/common";
+import { Injectable, BadRequestException, NotFoundException, InternalServerErrorException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Repository, DataSource } from "typeorm";
 import { Order } from "./order.entity";
 import { OrderItem } from "./order-item.entity";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { EventsService } from "../events/events.service";
-
 import { Event } from "../events/event.entity";
 
 @Injectable()
@@ -16,6 +15,7 @@ export class OrdersService {
         @InjectRepository(OrderItem)
         private readonly orderItemsRepository: Repository<OrderItem>,
         private readonly eventsService: EventsService,
+        private readonly dataSource: DataSource,
     ) { }
 
     async create(dto: CreateOrderDto): Promise<Order> {
@@ -23,48 +23,78 @@ export class OrdersService {
             throw new BadRequestException("O pedido deve conter pelo menos um item");
         }
 
-        // Validate all items first
-        const eventDetails: Array<{ event: Event; quantity: number }> = [];
-        for (const item of dto.items) {
-            const event = await this.eventsService.findOne(item.eventId);
-            if (event.availableTickets < item.quantity) {
-                throw new BadRequestException(
-                    `Ingressos insuficientes para "${event.title}". Disponível: ${event.availableTickets}`,
-                );
-            }
-            eventDetails.push({ event, quantity: item.quantity });
-        }
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
 
-        // Calculate total
-        const totalPrice = eventDetails.reduce(
-            (sum, { event, quantity }) => sum + Number(event.price) * quantity,
-            0,
-        );
+        try {
+            // 1. Batch load and validate events
+            const eventIds = dto.items.map(i => i.eventId);
+            const events = await this.eventsService.findByIds(eventIds);
 
-        // Create order with items
-        const order = this.ordersRepository.create({
-            customerName: dto.customerName,
-            customerEmail: dto.customerEmail,
-            paymentMethod: dto.paymentMethod || "pix",
-            totalPrice,
-            status: "CONFIRMED",
-            items: eventDetails.map(({ event, quantity }) => {
+            const eventMap = new Map(events.map(e => [e.id, e]));
+            const orderItems: OrderItem[] = [];
+            let totalPrice = 0;
+
+            for (const item of dto.items) {
+                const event = eventMap.get(item.eventId);
+                if (!event) {
+                    throw new BadRequestException(`Evento #${item.eventId} não encontrado`);
+                }
+
+                if (event.availableTickets < item.quantity) {
+                    throw new BadRequestException(
+                        `Ingressos insuficientes para "${event.title}". Disponíveis: ${event.availableTickets}`,
+                    );
+                }
+
                 const orderItem = new OrderItem();
                 orderItem.eventId = event.id;
-                orderItem.quantity = quantity;
+                orderItem.quantity = item.quantity;
                 orderItem.unitPrice = Number(event.price);
-                return orderItem;
-            }),
-        });
+                orderItems.push(orderItem);
 
-        const savedOrder = await this.ordersRepository.save(order);
+                totalPrice += orderItem.unitPrice * item.quantity;
 
-        // Decrease available tickets
-        for (const { event, quantity } of eventDetails) {
-            await this.eventsService.decreaseAvailableTickets(event.id, quantity);
+                // 2. Decrease tickets using atomic update within transaction
+                // Note: Even with the check above, the DB update has another check for safety
+                const updateResult = await queryRunner.manager
+                    .createQueryBuilder()
+                    .update(Event)
+                    .set({ availableTickets: () => `"availableTickets" - ${item.quantity}` })
+                    .where("id = :id AND \"availableTickets\" >= :quantity", {
+                        id: event.id,
+                        quantity: item.quantity
+                    })
+                    .execute();
+
+                if (updateResult.affected === 0) {
+                    throw new BadRequestException(`Não foi possível reservar ingressos para "${event.title}". Talvez tenham esgotado.`);
+                }
+            }
+
+            // 3. Create and save order
+            const order = queryRunner.manager.create(Order, {
+                customerName: dto.customerName,
+                customerEmail: dto.customerEmail,
+                paymentMethod: dto.paymentMethod || "pix",
+                totalPrice,
+                status: "CONFIRMED",
+                items: orderItems,
+            });
+
+            const savedOrder = await queryRunner.manager.save(order);
+            await queryRunner.commitTransaction();
+
+            // Return with relations (we can load them manually or use the saved object if possible)
+            return this.findOne(savedOrder.id);
+        } catch (err) {
+            await queryRunner.rollbackTransaction();
+            if (err instanceof BadRequestException) throw err;
+            throw new InternalServerErrorException("Erro ao processar o pedido: " + err.message);
+        } finally {
+            await queryRunner.release();
         }
-
-        return this.findOne(savedOrder.id);
     }
 
     async findOne(id: number): Promise<Order> {

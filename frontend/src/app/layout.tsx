@@ -9,7 +9,21 @@ const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
     title: "TicketNow — Ingressos para shows, festivais e eventos",
-    description: "Compre ingressos para os melhores shows, festivais, teatro e eventos esportivos.",
+    description: "Compre ingressos para os melhores shows, festivais, teatro e eventos esportivos. Encontre as melhores experiências aqui.",
+    keywords: ["ingressos", "shows", "festivais", "teatro", "eventos"],
+    openGraph: {
+        title: "TicketNow — Ingressos para shows, festivais e eventos",
+        description: "Compre ingressos para os melhores shows, festivais, teatro e eventos esportivos.",
+        type: "website",
+        locale: "pt_BR",
+        url: "https://ticketnow.com.br",
+        siteName: "TicketNow",
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "TicketNow — Ingressos para shows, festivais e eventos",
+        description: "Compre ingressos para os melhores shows, festivais, teatro e eventos esportivos.",
+    },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

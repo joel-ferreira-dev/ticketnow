@@ -5,6 +5,7 @@ import { OrdersService } from "./orders.service";
 import { Order } from "./order.entity";
 import { OrderItem } from "./order-item.entity";
 import { EventsService } from "../events/events.service";
+import { Repository, DataSource } from "typeorm";
 
 const mockEvent1 = {
     id: 1,
@@ -44,7 +45,30 @@ const mockOrderItemRepository = {};
 
 const mockEventsService = {
     findOne: jest.fn(),
+    findByIds: jest.fn(),
     decreaseAvailableTickets: jest.fn().mockResolvedValue(undefined),
+};
+
+const mockQueryRunner = {
+    connect: jest.fn(),
+    startTransaction: jest.fn(),
+    commitTransaction: jest.fn(),
+    rollbackTransaction: jest.fn(),
+    release: jest.fn(),
+    manager: {
+        createQueryBuilder: jest.fn(() => ({
+            update: jest.fn().mockReturnThis(),
+            set: jest.fn().mockReturnThis(),
+            where: jest.fn().mockReturnThis(),
+            execute: jest.fn().mockResolvedValue({ affected: 1 }),
+        })),
+        create: jest.fn().mockReturnValue(mockSavedOrder),
+        save: jest.fn().mockResolvedValue(mockSavedOrder),
+    },
+};
+
+const mockDataSource = {
+    createQueryRunner: jest.fn(() => mockQueryRunner),
 };
 
 describe("OrdersService", () => {
@@ -57,6 +81,7 @@ describe("OrdersService", () => {
                 { provide: getRepositoryToken(Order), useValue: mockOrderRepository },
                 { provide: getRepositoryToken(OrderItem), useValue: mockOrderItemRepository },
                 { provide: EventsService, useValue: mockEventsService },
+                { provide: DataSource, useValue: mockDataSource },
             ],
         }).compile();
 
@@ -66,11 +91,9 @@ describe("OrdersService", () => {
 
     describe("create", () => {
         it("should create an order with multiple items", async () => {
-            mockEventsService.findOne
-                .mockResolvedValueOnce(mockEvent1)
-                .mockResolvedValueOnce(mockEvent2);
-            mockOrderRepository.create.mockReturnValueOnce(mockSavedOrder);
-            mockOrderRepository.save.mockResolvedValueOnce(mockSavedOrder);
+            mockEventsService.findByIds.mockResolvedValueOnce([mockEvent1, mockEvent2]);
+            mockQueryRunner.manager.create.mockReturnValueOnce(mockSavedOrder);
+            mockQueryRunner.manager.save.mockResolvedValueOnce(mockSavedOrder);
             mockOrderRepository.findOne.mockResolvedValueOnce(mockSavedOrder);
 
             const result = await service.create({
@@ -84,16 +107,16 @@ describe("OrdersService", () => {
             });
 
             expect(result).toEqual(mockSavedOrder);
-            expect(mockEventsService.findOne).toHaveBeenCalledTimes(2);
-            expect(mockEventsService.decreaseAvailableTickets).toHaveBeenCalledWith(1, 2);
-            expect(mockEventsService.decreaseAvailableTickets).toHaveBeenCalledWith(2, 1);
+            expect(mockEventsService.findByIds).toHaveBeenCalledWith([1, 2]);
+            expect(mockQueryRunner.commitTransaction).toHaveBeenCalled();
+            expect(mockQueryRunner.release).toHaveBeenCalled();
         });
 
         it("should create an order with a single item", async () => {
-            mockEventsService.findOne.mockResolvedValueOnce(mockEvent1);
+            mockEventsService.findByIds.mockResolvedValueOnce([mockEvent1]);
             const singleOrder = { ...mockSavedOrder, totalPrice: 300, items: [mockSavedOrder.items![0]] };
-            mockOrderRepository.create.mockReturnValueOnce(singleOrder);
-            mockOrderRepository.save.mockResolvedValueOnce(singleOrder);
+            mockQueryRunner.manager.create.mockReturnValueOnce(singleOrder);
+            mockQueryRunner.manager.save.mockResolvedValueOnce(singleOrder);
             mockOrderRepository.findOne.mockResolvedValueOnce(singleOrder);
 
             const result = await service.create({
@@ -103,7 +126,7 @@ describe("OrdersService", () => {
             });
 
             expect(result).toEqual(singleOrder);
-            expect(mockEventsService.findOne).toHaveBeenCalledTimes(1);
+            expect(mockEventsService.findByIds).toHaveBeenCalledWith([1]);
         });
 
         it("should throw BadRequestException when items is empty", async () => {
@@ -117,10 +140,10 @@ describe("OrdersService", () => {
         });
 
         it("should throw BadRequestException when not enough tickets", async () => {
-            mockEventsService.findOne.mockResolvedValueOnce({
+            mockEventsService.findByIds.mockResolvedValueOnce([{
                 ...mockEvent1,
                 availableTickets: 1,
-            });
+            }]);
 
             await expect(
                 service.create({
@@ -129,12 +152,17 @@ describe("OrdersService", () => {
                     items: [{ eventId: 1, quantity: 5 }],
                 }),
             ).rejects.toThrow(BadRequestException);
+            expect(mockQueryRunner.rollbackTransaction).toHaveBeenCalled();
         });
 
-        it("should throw when second item has insufficient tickets", async () => {
-            mockEventsService.findOne
-                .mockResolvedValueOnce(mockEvent1)
-                .mockResolvedValueOnce({ ...mockEvent2, availableTickets: 0 });
+        it("should throw when second item has insufficient tickets in DB", async () => {
+            mockEventsService.findByIds.mockResolvedValueOnce([mockEvent1, mockEvent2]);
+
+            // First item succeeds, second item fails in DB update (race condition)
+            mockQueryRunner.manager.createQueryBuilder()
+                .execute
+                .mockResolvedValueOnce({ affected: 1 })
+                .mockResolvedValueOnce({ affected: 0 });
 
             await expect(
                 service.create({
@@ -146,12 +174,13 @@ describe("OrdersService", () => {
                     ],
                 }),
             ).rejects.toThrow(BadRequestException);
+            expect(mockQueryRunner.rollbackTransaction).toHaveBeenCalled();
         });
 
         it("should default paymentMethod to pix", async () => {
-            mockEventsService.findOne.mockResolvedValueOnce(mockEvent1);
-            mockOrderRepository.create.mockReturnValueOnce(mockSavedOrder);
-            mockOrderRepository.save.mockResolvedValueOnce(mockSavedOrder);
+            mockEventsService.findByIds.mockResolvedValueOnce([mockEvent1]);
+            mockQueryRunner.manager.create.mockReturnValueOnce(mockSavedOrder);
+            mockQueryRunner.manager.save.mockResolvedValueOnce(mockSavedOrder);
             mockOrderRepository.findOne.mockResolvedValueOnce(mockSavedOrder);
 
             await service.create({
@@ -160,7 +189,8 @@ describe("OrdersService", () => {
                 items: [{ eventId: 1, quantity: 1 }],
             });
 
-            expect(mockOrderRepository.create).toHaveBeenCalledWith(
+            expect(mockQueryRunner.manager.create).toHaveBeenCalledWith(
+                expect.any(Function),
                 expect.objectContaining({ paymentMethod: "pix" }),
             );
         });

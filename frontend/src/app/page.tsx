@@ -29,18 +29,28 @@ export default function EventsPage() {
     const [selectedCategory, setSelectedCategory] = useState("Todos");
 
     useEffect(() => {
+        let isMounted = true;
         const fetchEvents = async () => {
+            setLoading(true);
             try {
                 const response = await api.get<Event[]>("/events");
-                setEvents(response.data);
-            } catch {
-                setError("Não foi possível carregar os eventos. Tente novamente mais tarde.");
+                if (isMounted) {
+                    setEvents(response.data);
+                    setError(null);
+                }
+            } catch (err) {
+                if (isMounted) {
+                    setError("Não foi possível carregar os eventos. Verifique sua conexão.");
+                }
             } finally {
-                setLoading(false);
+                if (isMounted) {
+                    setLoading(false);
+                }
             }
         };
 
         fetchEvents();
+        return () => { isMounted = false; };
     }, []);
 
     const filteredEvents = useMemo(() => {

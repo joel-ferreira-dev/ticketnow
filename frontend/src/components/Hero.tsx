@@ -38,11 +38,15 @@ export default function Hero({
                         lineHeight: 0.9,
                         fontWeight: 900,
                         letterSpacing: "-0.04em",
-                        textTransform: "uppercase"
+                        textTransform: "uppercase",
+                        background: "linear-gradient(90deg, #000 0%, #666 100%)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        display: "inline-block"
                     }}
                 >
                     Eventos <br />
-                    <Box component="span" sx={{ color: "primary.main" }}>Imersivos</Box>
+                    <Box component="span" sx={{ color: "primary.main", WebkitTextFillColor: "initial" }}>Imersivos</Box>
                 </Typography>
             </AnimatedSection>
 
@@ -50,9 +54,9 @@ export default function Hero({
                 <Typography
                     variant="body1"
                     color="text.secondary"
-                    sx={{ mb: 5, maxWidth: 450, fontSize: "1.1rem", fontWeight: 500 }}
+                    sx={{ mb: 5, maxWidth: 450, fontSize: "1.1rem", fontWeight: 500, lineHeight: 1.6 }}
                 >
-                    A plataforma definitiva para descobrir festivais, shows e experiências que desafiam o comum.
+                    A plataforma definitiva para descobrir festivais, shows e experiências que desafiam o comum. Explore o entretenimento do futuro.
                 </Typography>
             </AnimatedSection>
 
@@ -63,6 +67,8 @@ export default function Hero({
                         value={search}
                         onChange={(e) => onSearchChange(e.target.value)}
                         size="medium"
+                        label="Buscar Eventos"
+                        aria-label="Buscar por nome do evento ou local"
                         sx={{
                             minWidth: { md: 400 },
                             "& .MuiOutlinedInput-root": {

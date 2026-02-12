@@ -22,6 +22,12 @@ export class EventsService {
         return event;
     }
 
+    async findByIds(ids: number[]): Promise<Event[]> {
+        return this.eventsRepository.createQueryBuilder("event")
+            .where("event.id IN (:...ids)", { ids })
+            .getMany();
+    }
+
     async decreaseAvailableTickets(id: number, quantity: number): Promise<void> {
         await this.eventsRepository
             .createQueryBuilder()
