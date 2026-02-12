@@ -39,17 +39,16 @@ services:
     depends_on:
       - backend
 
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@ticketnow.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-      PGADMIN_CONFIG_SERVER_MODE: "False"
+  storybook:
+    build: ./design-system
     ports:
-      - "5050:80"
-    depends_on:
-      postgres:
-        condition: service_healthy
+      - "6006:6006"
+    volumes:
+      - ./design-system:/app
+      - ./frontend:/frontend
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
 
 volumes:
   pgdata:
