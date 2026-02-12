@@ -156,49 +156,64 @@ export default function EventCard({ event }: EventCardProps) {
                         </Box>
                     </Stack>
                 </CardContent>
-                <CardActions sx={{ p: 2, pt: 0, justifyContent: "space-between", alignItems: "center" }}>
-                    <Typography variant="h4" sx={{ color: "primary.main", fontWeight: 800 }}>
-                        {formattedPrice}
-                    </Typography>
-                    {!isSoldOut && (
-                        <Stack direction="row" spacing={0.5} alignItems="center">
-                            <IconButton
-                                size="small"
-                                onClick={(e) => { e.stopPropagation(); setQuantity((q) => Math.max(1, q - 1)); }}
-                                disabled={quantity <= 1}
-                                sx={{ border: "1px solid", borderColor: "divider", width: 28, height: 28 }}
-                            >
-                                <RemoveIcon sx={{ fontSize: 14 }} />
-                            </IconButton>
-                            <Typography variant="body2" fontWeight={700} sx={{ minWidth: 20, textAlign: "center" }}>
-                                {quantity}
+                <Box sx={{ p: 3, pt: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+                    {/* Linha Superior: Preço e Quantidade */}
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <Box>
+                            <Typography variant="caption" sx={{ color: "text.secondary", textTransform: "uppercase", fontWeight: 700, fontSize: "0.65rem", display: "block", mb: -0.5 }}>
+                                Valor
                             </Typography>
-                            <IconButton
-                                size="small"
-                                onClick={(e) => { e.stopPropagation(); setQuantity((q) => Math.min(maxQty, q + 1)); }}
-                                disabled={quantity >= maxQty}
-                                sx={{ border: "1px solid", borderColor: "divider", width: 28, height: 28 }}
-                            >
-                                <AddIcon sx={{ fontSize: 14 }} />
-                            </IconButton>
+                            <Typography variant="h5" sx={{ color: "primary.main", fontWeight: 800 }}>
+                                {formattedPrice}
+                            </Typography>
+                        </Box>
+
+                        {!isSoldOut && (
+                            <Stack direction="row" spacing={1} alignItems="center" sx={{ bgcolor: "rgba(255,255,255,0.03)", borderRadius: "1px", p: 0.5, border: "1px solid rgba(255,255,255,0.1)" }}>
+                                <IconButton
+                                    size="small"
+                                    onClick={(e) => { e.stopPropagation(); setQuantity((q) => Math.max(1, q - 1)); }}
+                                    disabled={quantity <= 1}
+                                    sx={{ width: 28, height: 28, borderRadius: 0 }}
+                                >
+                                    <RemoveIcon sx={{ fontSize: 14 }} />
+                                </IconButton>
+                                <Typography variant="body2" fontWeight={800} sx={{ minWidth: 20, textAlign: "center" }}>
+                                    {quantity}
+                                </Typography>
+                                <IconButton
+                                    size="small"
+                                    onClick={(e) => { e.stopPropagation(); setQuantity((q) => Math.min(maxQty, q + 1)); }}
+                                    disabled={quantity >= maxQty}
+                                    sx={{ width: 28, height: 28, borderRadius: 0 }}
+                                >
+                                    <AddIcon sx={{ fontSize: 14 }} />
+                                </IconButton>
+                            </Stack>
+                        )}
+                    </Box>
+
+                    {/* Linha Inferior: Botão Centralizado */}
+                    <Box sx={{ display: "flex", justifyContent: "center" }}>
+                        {!isSoldOut ? (
                             <Button
+                                premium
                                 variant="contained"
-                                size="small"
-                                startIcon={<AddShoppingCartIcon sx={{ fontSize: 16 }} />}
+                                fullWidth
+                                startIcon={<AddShoppingCartIcon />}
                                 onClick={handleAdd}
                                 disabled={maxQty <= 0}
-                                sx={{ minWidth: 100, ml: 0.5 }}
+                                sx={{ height: 44 }}
                             >
-                                {maxQty <= 0 ? "No cart" : "Adicionar"}
+                                {maxQty <= 0 ? "Esgotado no carrinho" : "Adicionar ao Carrinho"}
                             </Button>
-                        </Stack>
-                    )}
-                    {isSoldOut && (
-                        <Button variant="contained" disabled size="small" sx={{ minWidth: 120 }}>
-                            Esgotado
-                        </Button>
-                    )}
-                </CardActions>
+                        ) : (
+                            <Button variant="contained" disabled fullWidth sx={{ height: 44 }}>
+                                Esgotado
+                            </Button>
+                        )}
+                    </Box>
+                </Box>
             </Card>
             <Snackbar
                 open={showSnackbar}
