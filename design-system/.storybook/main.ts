@@ -10,11 +10,22 @@ const config: StorybookConfig = {
         name: "@storybook/react-vite",
         options: {},
     },
-    staticDirs: ["../public"],
+    staticDirs: ["../../frontend/public"],
     async viteFinal(config) {
+        const path = await import("path");
+        config.resolve = config.resolve || {};
+        config.resolve.alias = {
+            ...config.resolve.alias,
+            "@": path.resolve(__dirname, "../../frontend/src"),
+        };
+
         const { mergeConfig } = await import("vite");
         return mergeConfig(config, {
-            plugins: [tsconfigPaths()],
+            server: {
+                fs: {
+                    allow: ["..", "../../frontend"],
+                },
+            },
         });
     },
 };

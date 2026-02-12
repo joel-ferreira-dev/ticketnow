@@ -1,9 +1,9 @@
 import type { Preview } from "@storybook/react";
 import React from "react";
 import { ThemeProvider, CssBaseline } from "@mui/material";
-import theme from "../src/theme/theme";
+import theme from "../../frontend/src/theme/theme";
 
-import { CartProvider } from "../src/context/CartContext";
+import { CartProvider } from "../../frontend/src/context/CartContext";
 
 const preview: Preview = {
     decorators: [
