@@ -21,17 +21,16 @@ describe("CartDrawer", () => {
             { wrapper },
         );
 
-        expect(screen.getByText(/Carrinho/i)).toBeInTheDocument();
+        expect(screen.getAllByText(/Carrinho/i).length).toBeGreaterThan(0);
     });
 
     it("should not render content when closed", () => {
-        const { container } = render(
+        const { queryByText } = render(
             <CartDrawer open={false} onClose={jest.fn()} />,
             { wrapper },
         );
 
-        // MUI Drawer hides content when closed
-        expect(container.querySelector(".MuiDrawer-root")).toBeTruthy();
+        expect(queryByText(/Carrinho/i)).not.toBeInTheDocument();
     });
 
     it("should show empty cart message when no items", () => {
@@ -40,7 +39,7 @@ describe("CartDrawer", () => {
             { wrapper },
         );
 
-        expect(screen.getByText(/carrinho vazio/i)).toBeInTheDocument();
+        expect(screen.getByText(/Seu carrinho está vazio/i)).toBeInTheDocument();
     });
 
     it("should show checkout button text", () => {

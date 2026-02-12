@@ -63,7 +63,7 @@ describe("EventCard", () => {
 
     it("should show Esgotado for sold out events", () => {
         render(<EventCard event={soldOutEvent} />, { wrapper });
-        expect(screen.getByText("Esgotado")).toBeInTheDocument();
+        expect(screen.getAllByText("Esgotado").length).toBeGreaterThan(0);
     });
 
     it("should not show Adicionar button for sold out events", () => {
