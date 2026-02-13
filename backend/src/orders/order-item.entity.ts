@@ -25,7 +25,7 @@ export class OrderItem {
     @Column()
     orderId: number;
 
-    @ManyToOne(() => Event)
+    @ManyToOne(() => Event, (event) => event.orderItems)
     @JoinColumn({ name: "eventId" })
     event: Event;
 

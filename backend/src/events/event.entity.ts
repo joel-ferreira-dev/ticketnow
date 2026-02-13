@@ -4,7 +4,9 @@ import {
     Column,
     CreateDateColumn,
     UpdateDateColumn,
+    OneToMany,
 } from "typeorm";
+import { OrderItem } from "../orders/order-item.entity";
 
 @Entity("events")
 export class Event {
@@ -43,4 +45,7 @@ export class Event {
 
     @UpdateDateColumn()
     updatedAt: Date;
+
+    @OneToMany(() => OrderItem, (item) => item.event)
+    orderItems: OrderItem[];
 }

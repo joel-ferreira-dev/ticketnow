@@ -1,6 +1,7 @@
 import { DataSource } from "typeorm";
 import { Event } from "../events/event.entity";
 import { Order } from "../orders/order.entity";
+import { OrderItem } from "../orders/order-item.entity";
 
 const dataSource = new DataSource({
     type: "postgres",
@@ -9,7 +10,7 @@ const dataSource = new DataSource({
     username: process.env.DB_USER || "postgres",
     password: process.env.DB_PASSWORD || "postgres",
     database: process.env.DB_NAME || "ticketnow",
-    entities: [Event, Order],
+    entities: [Event, Order, OrderItem],
     synchronize: true,
 });
 
